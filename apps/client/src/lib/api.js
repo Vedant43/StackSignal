@@ -9,7 +9,7 @@ export const api = axios.create({
   },
 });
 
-const TOKEN_KEY = "stacksignal_token";
+const TOKEN_KEY = "stacksignal_token"; 
 
 export const setAuthToken = (token) => {
   try {
