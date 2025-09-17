@@ -1,0 +1,23 @@
+{
+  "name": "stacksignal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev:server": "pnpm --filter server exec nodemon apps/server/src/server.js",
+    "dev:client": "pnpm --filter client dev",
+    "dev:widget": "pnpm --filter widget dev",
+    "dev": "concurrently -k -n client,server -c cyan,magenta \"pnpm run dev:client\" \"pnpm run dev:server\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.13.1",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "description": "",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  }
+}

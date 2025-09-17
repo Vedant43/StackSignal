@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id    String     @id @default(uuid())
+  name String
+  email String  @unique
+  username  String? @unique
+  slug String @unique
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  anonymousSessions AnonymousSession[]
+}
+
+// conside slug for feedback
+model Feedback {
+  id String @id @default(uuid())
+  title String
+  description String
+  category FeedbackCategory @default(OTHER)
+  status FeedbackStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  anonymousSessionId String? 
+  userId String?
+
+  anonymousSession AnonymousSession? @relation(fields: [anonymousSessionId], references: [id])
+
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  sessionId String
+  submissionId String? @default(uuid())
+  type      String
+  message   String?
+  data      Json?
+  createdAt DateTime @default(now())
+
+  anonymousSession AnonymousSession  @relation(fields: [sessionId], references: [id])
+}
+
+
+model AnonymousSession {
+  id         String   @id
+  clientId   String
+  createdAt DateTime @default(now())
+
+  client Client @relation(fields: [clientId],references: [id])
+  feedbacks Feedback[]
+  logs Log[]
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum FeedbackCategory {
+  BUG
+  FEATURE
+  UX
+  OTHER
+}
+
+//npx prisma db push

@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id    String     @id @default(uuid())
+  name String
+  email String  @unique
+  username  String? @unique
+  slug String @unique
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+  userClientLinks UserClientLink[]
+  anonymousSessions AnonymousSession[]
+}
+
+model User {
+  id String @id @default(uuid())
+  username String @unique
+  email String @unique
+  avatarUrl String?
+  displayName String?
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientId String
+  client Client @relation(fields: [clientId], references: [id])
+
+  userClientLinks  UserClientLink[]
+  feedbacks Feedback[]
+  feedbackComments FeedbackComment[]
+  feedbackVotes FeedbackVote[]
+}
+
+model UserClientLink {
+  id String @id @default(uuid())
+  clientId String 
+  userId String
+
+  client Client @relation(fields: [clientId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([clientId, userId]) 
+}
+
+// conside slug for feedback
+model Feedback {
+  id String @id @default(uuid())
+  title String
+  description String
+  category FeedbackCategory @default(OTHER)
+  status FeedbackStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  anonymousSessionId String? 
+  userId String?
+
+  user User? @relation(fields: [userId], references: [id])
+  anonymousSession AnonymousSession? @relation(fields: [anonymousSessionId], references: [id])
+
+  comments FeedbackComment[]
+  feedbackVotes FeedbackVote[]
+}
+
+model FeedbackComment {
+  id String @id @default(uuid())
+  comment String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  feedbackId String
+
+  user User @relation(fields: [userId], references: [id])
+  feedback Feedback @relation(fields: [feedbackId], references: [id])
+}
+
+model FeedbackVote {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  feedbackId String
+
+  user User @relation(fields: [userId], references: [id])
+  feedback Feedback @relation(fields: [feedbackId], references: [id])
+
+  @@unique([userId, feedbackId])
+}
+
+model AnonymousSession {
+  id         String   @id @default(uuid())
+  clientId   String
+  createdAt DateTime @default(now())
+
+  client Client @relation(fields: [clientId],references: [id])
+  feedbacks Feedback[]
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum FeedbackCategory {
+  BUG
+  FEATURE
+  UX
+  OTHER
+}
